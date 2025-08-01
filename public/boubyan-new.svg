@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400">
+  <!-- Red curved element at top -->
+  <path d="M0 120 C 200 60, 400 60, 600 120 C 650 140, 700 160, 750 200 C 780 220, 800 250, 800 280 L 800 0 L 0 0 Z" fill="#D53F47"/>
+  
+  <!-- Arabic text -->
+  <text x="400" y="180" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#5A5A5A">
+    بنك بوبيان
+  </text>
+  
+  <!-- English text -->
+  <text x="400" y="250" font-family="Arial, sans-serif" font-size="64" font-weight="bold" text-anchor="middle" fill="#5A5A5A">
+    Boubyan Bank
+  </text>
+</svg>
