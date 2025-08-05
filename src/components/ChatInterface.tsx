@@ -2,11 +2,14 @@ import { useState, useRef } from 'react'
 import { Send, Download, ExternalLink } from 'lucide-react'
 import { AgentService } from '../services/agentService'
 import MermaidRenderer, { MermaidRendererRef } from './MermaidRenderer'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { cn } from '../lib/utils'
 
 export default function ChatInterface() {
   const [ytUrl, setYtUrl] = useState('')
   const [mermaidDiagram, setMermaidDiagram] = useState('')
+  const [description, setDescription] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState('')
   const mermaidRef = useRef<MermaidRendererRef>(null)
@@ -75,10 +78,12 @@ export default function ChatInterface() {
     setIsLoading(true)
     setError('')
     setMermaidDiagram('')
+    setDescription('')
 
     try {
       const result = await AgentService.processYouTubeUrl(ytUrl)
-      setMermaidDiagram(result)
+      setMermaidDiagram(result.mermaid)
+      setDescription(result.description)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred')
     } finally {
@@ -175,6 +180,35 @@ export default function ChatInterface() {
                   chart={mermaidDiagram} 
                   className="w-full"
                 />
+                
+                {/* Process Description */}
+                {description && (
+                  <div className="mt-6 border-t border-slate-700/50 pt-6">
+                    <div className="bg-slate-800/30 border border-slate-700/30 rounded-lg p-6">
+                      <div className="prose prose-invert prose-slate max-w-none text-slate-200">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm]}
+                          components={{
+                            h1: ({children}) => <h1 className="text-xl font-bold text-cyber-purple mb-4">{children}</h1>,
+                            h2: ({children}) => <h2 className="text-lg font-semibold text-cyber-blue mb-3">{children}</h2>,
+                            h3: ({children}) => <h3 className="text-md font-medium text-cyber-pink mb-2">{children}</h3>,
+                            p: ({children}) => <p className="mb-4 leading-relaxed">{children}</p>,
+                            ul: ({children}) => <ul className="list-disc list-outside mb-4 space-y-1 ml-4">{children}</ul>,
+                            ol: ({children}) => <ol className="list-decimal list-outside mb-4 space-y-1 ml-4">{children}</ol>,
+                            li: ({children}) => <li className="text-slate-300">{children}</li>,
+                            code: ({children}) => <code className="bg-slate-700/50 px-2 py-1 rounded text-cyber-green font-mono text-sm">{children}</code>,
+                            pre: ({children}) => <pre className="bg-slate-900/50 p-4 rounded-lg overflow-x-auto mb-4 border border-slate-700/30">{children}</pre>,
+                            blockquote: ({children}) => <blockquote className="border-l-4 border-cyber-purple pl-4 italic text-slate-400 mb-4">{children}</blockquote>,
+                            strong: ({children}) => <strong className="text-cyber-blue font-semibold">{children}</strong>,
+                            em: ({children}) => <em className="text-cyber-pink italic">{children}</em>,
+                          }}
+                        >
+                          {description}
+                        </ReactMarkdown>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

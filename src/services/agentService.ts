@@ -9,8 +9,14 @@ export interface AgentStatusResponse {
     status: 'queued' | 'running' | 'finished' | 'failed';
     outputs?: {
       mermaid: string;
+      description: string;
     };
   };
+}
+
+export interface ProcessResult {
+  mermaid: string;
+  description: string;
 }
 
 export class AgentService {
@@ -95,7 +101,7 @@ export class AgentService {
     }
   }
 
-  static async pollExecutionUntilComplete(executionId: string, maxAttempts: number = 300): Promise<string> {
+  static async pollExecutionUntilComplete(executionId: string, maxAttempts: number = 300): Promise<ProcessResult> {
     let attempts = 0;
     
     while (attempts < maxAttempts) {
@@ -106,7 +112,10 @@ export class AgentService {
       
       if (statusResponse.execution.status === 'finished') {
         if (statusResponse.execution.outputs?.mermaid) {
-          return statusResponse.execution.outputs.mermaid;
+          return {
+            mermaid: statusResponse.execution.outputs.mermaid,
+            description: statusResponse.execution.outputs.description || ''
+          };
         } else {
           throw new Error('No mermaid diagram received from AI agent');
         }
@@ -120,15 +129,15 @@ export class AgentService {
     throw new Error('AI agent processing timeout - please try again');
   }
 
-  static async processYouTubeUrl(ytUrl: string): Promise<string> {
+  static async processYouTubeUrl(ytUrl: string): Promise<ProcessResult> {
     try {
       // Step 1: Execute the agent
       const executionId = await this.executeAgent(ytUrl);
       
-      // Step 2: Poll until completion and get the mermaid diagram
-      const mermaidDiagram = await this.pollExecutionUntilComplete(executionId);
+      // Step 2: Poll until completion and get both mermaid diagram and description
+      const result = await this.pollExecutionUntilComplete(executionId);
       
-      return mermaidDiagram;
+      return result;
     } catch (error) {
       console.error('Error processing YouTube URL:', error);
       throw error;
